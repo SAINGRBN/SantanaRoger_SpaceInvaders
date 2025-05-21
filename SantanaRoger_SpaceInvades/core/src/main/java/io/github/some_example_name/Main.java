@@ -243,7 +243,7 @@ public class Main implements ApplicationListener {
                 player.shoot();
             }
         } else {
-            player.setIdle();
+           // player.setIdle();
         }
     }
 
