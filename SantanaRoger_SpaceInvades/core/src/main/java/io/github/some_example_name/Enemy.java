@@ -34,7 +34,7 @@ public class Enemy {
         this.y = startY;
         this.worldWidth = worldWidth;
         this.bullets = new Array<>();
-        this.bulletTexture = new Texture("bullet_0.png");
+        this.bulletTexture = new Texture("bullet_1.png");
 
         TextureRegion[] idleFrames = new TextureRegion[5];
         TextureRegion[] sideStartFrames = new TextureRegion[3];
@@ -114,14 +114,12 @@ public class Enemy {
             bullet.setPosition(x + 0.4f, y);
             bullets.add(bullet);
             shootTimer = 0f;
+
+            System.out.println("Estoy Disparando");
+
         }
     }
 
-    public void receiveHit() {
-        // Lógica para cuando el enemigo es alcanzado por una bala
-        // Aquí podrías reducir vida, activar una animación de muerte, etc.
-        System.out.println("Enemy hit!");
-    }
 
     public Array<Sprite> getBullets() {
         return bullets;

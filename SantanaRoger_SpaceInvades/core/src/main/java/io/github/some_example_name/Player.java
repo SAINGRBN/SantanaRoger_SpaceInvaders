@@ -19,6 +19,8 @@ public class Player {
     private Texture bulletTexture;
     private Array<Sprite> bullets;
 
+    public int lives = 3;
+
     private enum State {
         IDLE, START_LEFT, MOVE_LEFT, START_RIGHT, MOVE_RIGHT
     }
@@ -140,8 +142,6 @@ public class Player {
     public void draw(Batch batch) {
         TextureRegion currentFrame;
 
-        System.out.println(currentState.toString());
-
         switch (currentState) {
             case START_LEFT:
                 currentFrame = startLeftAnimation.getKeyFrame(stateTime);
@@ -192,22 +192,31 @@ public class Player {
         return new Rectangle(x, y, 1f, 1f);
     }
     public void moveRight(float delta) {
-        x += speed * delta;
+        float nextX = x + speed * delta;
+        float screenWidth = Gdx.graphics.getWidth();
+
+        if (nextX < 7) {
+            x = nextX;
+        }
+
         if (currentState != State.START_RIGHT && currentState != State.MOVE_RIGHT) {
             currentState = State.START_RIGHT;
             stateTime = 0f;
-
-            System.out.println("PlayerAAAAAAAAAAAA hit!");
         } else if (currentState == State.START_RIGHT && startRightAnimation.isAnimationFinished(stateTime)) {
             currentState = State.MOVE_RIGHT;
             stateTime = 0f;
-
-            System.out.println("Player hit!");
         }
     }
 
+
+
     public void moveLeft(float delta) {
-        x -= speed * delta;
+        float nextX = x - speed * delta;
+
+        if (nextX >= 0) {
+            x = nextX;
+        }
+
         if (currentState != State.START_LEFT && currentState != State.MOVE_LEFT) {
             currentState = State.START_LEFT;
             stateTime = 0f;
@@ -224,6 +233,18 @@ public class Player {
         }
     }
 
+    public void removeLive() {
+        lives--;
+        System.out.println("Player hit! Lives left: " + lives);
+        if (lives <= 0) {
+            // Cambia a la pantalla de Game Over
+            if (Gdx.app.getApplicationListener() instanceof Game game) {
+                game.setScreen(new GameOverScreen(game));
+            }
+        }
+    }
+
+    public int getLives() { return lives; }
 
     public float getX() { return x; }
     public float getY() { return y; }
