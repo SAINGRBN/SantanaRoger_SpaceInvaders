@@ -1,4 +1,167 @@
-package com.mygdx.game;
+package io.github.some_example_name;
+/*
+import com.badlogic.gdx.ApplicationListener;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+
+public class Main implements ApplicationListener {
+    Texture backgroundTexture;
+    Texture bucketTexture;
+    Texture dropTexture;
+    Sound dropSound;
+    Music music;
+    SpriteBatch spriteBatch;
+    FitViewport viewport;
+    Sprite bucketSprite;
+    Vector2 touchPos;
+    Array<Sprite> dropSprites;
+    float dropTimer;
+    Rectangle bucketRectangle;
+    Rectangle dropRectangle;
+
+    @Override
+    public void create() {
+        backgroundTexture = new Texture("background.png");
+        bucketTexture = new Texture("bucket.png");
+        dropTexture = new Texture("drop.png");
+        dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
+        music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
+        spriteBatch = new SpriteBatch();
+        viewport = new FitViewport(8, 5);
+        bucketSprite = new Sprite(bucketTexture);
+        bucketSprite.setSize(1, 1);
+        touchPos = new Vector2();
+        dropSprites = new Array<>();
+        bucketRectangle = new Rectangle();
+        dropRectangle = new Rectangle();
+        music.setLooping(true);
+        music.setVolume(.5f);
+        music.play();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height, true);
+    }
+
+    @Override
+    public void render() {
+        input();
+        logic();
+        draw();
+    }
+
+    private void input() {
+        float speed = 4f;
+        float delta = Gdx.graphics.getDeltaTime();
+
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            bucketSprite.translateX(speed * delta);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            bucketSprite.translateX(-speed * delta);
+        }
+
+        if (Gdx.input.isTouched()) {
+            touchPos.set(Gdx.input.getX(), Gdx.input.getY());
+            viewport.unproject(touchPos);
+            bucketSprite.setCenterX(touchPos.x);
+        }
+    }
+
+    private void logic() {
+        float worldWidth = viewport.getWorldWidth();
+        float worldHeight = viewport.getWorldHeight();
+        float bucketWidth = bucketSprite.getWidth();
+        float bucketHeight = bucketSprite.getHeight();
+
+        bucketSprite.setX(MathUtils.clamp(bucketSprite.getX(), 0, worldWidth - bucketWidth));
+
+        float delta = Gdx.graphics.getDeltaTime();
+        bucketRectangle.set(bucketSprite.getX(), bucketSprite.getY(), bucketWidth, bucketHeight);
+
+        for (int i = dropSprites.size - 1; i >= 0; i--) {
+            Sprite dropSprite = dropSprites.get(i);
+            float dropWidth = dropSprite.getWidth();
+            float dropHeight = dropSprite.getHeight();
+
+            dropSprite.translateY(-2f * delta);
+            dropRectangle.set(dropSprite.getX(), dropSprite.getY(), dropWidth, dropHeight);
+
+            if (dropSprite.getY() < -dropHeight) dropSprites.removeIndex(i);
+            else if (bucketRectangle.overlaps(dropRectangle)) {
+                dropSprites.removeIndex(i);
+                dropSound.play();
+            }
+        }
+
+        dropTimer += delta;
+        if (dropTimer > 1f) {
+            dropTimer = 0;
+            createDroplet();
+        }
+    }
+
+    private void draw() {
+        ScreenUtils.clear(Color.BLACK);
+        viewport.apply();
+        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
+        spriteBatch.begin();
+
+        float worldWidth = viewport.getWorldWidth();
+        float worldHeight = viewport.getWorldHeight();
+
+        spriteBatch.draw(backgroundTexture, 0, 0, worldWidth, worldHeight);
+        bucketSprite.draw(spriteBatch);
+
+        for (Sprite dropSprite : dropSprites) {
+            dropSprite.draw(spriteBatch);
+        }
+
+        spriteBatch.end();
+    }
+
+    private void createDroplet() {
+        float dropWidth = 1;
+        float dropHeight = 1;
+        float worldWidth = viewport.getWorldWidth();
+        float worldHeight = viewport.getWorldHeight();
+
+        Sprite dropSprite = new Sprite(dropTexture);
+        dropSprite.setSize(dropWidth, dropHeight);
+        dropSprite.setX(MathUtils.random(0f, worldWidth - dropWidth));
+        dropSprite.setY(worldHeight);
+        dropSprites.add(dropSprite);
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void dispose() {
+
+    }
+}
+*/
+
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
@@ -16,40 +179,34 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
-public class SpaceInvadersGame implements ApplicationListener {
+public class Main implements ApplicationListener {
     Texture backgroundTexture;
-    Texture playerTexture;
-    Texture bulletTexture;
-    Sound shootSound;
-    Music backgroundMusic;
-    SpriteBatch batch;
+    Sound dropSound;
+    Music music;
+    SpriteBatch spriteBatch;
     FitViewport viewport;
-    Sprite playerSprite;
     Vector2 touchPos;
-    Array<Sprite> bullets;
-    float bulletCooldown;
-    Rectangle playerBounds;
-    Rectangle bulletBounds;
+    Player player;
+    Array<Enemy> enemies;
 
     @Override
     public void create() {
         backgroundTexture = new Texture("background.png");
-        playerTexture = new Texture("player.png");
-        bulletTexture = new Texture("bullet.png");
-        shootSound = Gdx.audio.newSound(Gdx.files.internal("shoot.wav"));
-        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("bgm.mp3"));
-        batch = new SpriteBatch();
+        dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
+        music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
+        spriteBatch = new SpriteBatch();
         viewport = new FitViewport(8, 5);
-        playerSprite = new Sprite(playerTexture);
-        playerSprite.setSize(1, 1);
-        playerSprite.setPosition(3.5f, 0.5f);
         touchPos = new Vector2();
-        bullets = new Array<>();
-        playerBounds = new Rectangle();
-        bulletBounds = new Rectangle();
-        backgroundMusic.setLooping(true);
-        backgroundMusic.setVolume(0.5f);
-        backgroundMusic.play();
+        music.setLooping(true);
+        music.setVolume(.5f);
+        music.play();
+
+        player = new Player(4f, 0.5f);
+
+        enemies = new Array<>();
+        for (int i = 0; i < 5; i++) {
+            enemies.add(new Enemy(1f + i * 1.2f, 4f, viewport.getWorldWidth()));
+        }
     }
 
     @Override
@@ -59,88 +216,76 @@ public class SpaceInvadersGame implements ApplicationListener {
 
     @Override
     public void render() {
-        handleInput();
-        updateLogic();
-        drawGame();
+        input();
+        logic();
+        draw();
     }
 
-    private void handleInput() {
-        float speed = 4f * Gdx.graphics.getDeltaTime();
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            playerSprite.translateX(-speed);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            playerSprite.translateX(speed);
-        }
+    private void input() {
+        float delta = Gdx.graphics.getDeltaTime();
 
         if (Gdx.input.isTouched()) {
             touchPos.set(Gdx.input.getX(), Gdx.input.getY());
             viewport.unproject(touchPos);
-            playerSprite.setCenterX(touchPos.x);
-        }
 
-        bulletCooldown -= Gdx.graphics.getDeltaTime();
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && bulletCooldown <= 0) {
-            shootBullet();
-            bulletCooldown = 0.5f;
-        }
-    }
-
-    private void updateLogic() {
-        float worldWidth = viewport.getWorldWidth();
-        float playerWidth = playerSprite.getWidth();
-        playerSprite.setX(MathUtils.clamp(playerSprite.getX(), 0, worldWidth - playerWidth));
-
-        float delta = Gdx.graphics.getDeltaTime();
-        playerBounds.set(playerSprite.getX(), playerSprite.getY(), playerSprite.getWidth(), playerSprite.getHeight());
-
-        for (int i = bullets.size - 1; i >= 0; i--) {
-            Sprite bullet = bullets.get(i);
-            bullet.translateY(5f * delta);
-            if (bullet.getY() > viewport.getWorldHeight()) {
-                bullets.removeIndex(i);
+            // Movimiento táctil
+            float screenMiddle = viewport.getWorldWidth() / 2f;
+            if (touchPos.y < 2f) { // Zona baja = control de movimiento
+                if (touchPos.x < screenMiddle) {
+                    player.moveLeft(delta);
+                } else {
+                    player.moveRight(delta);
+                }
             }
+
+            // Disparo táctil
+            if (touchPos.y >= 2f) {
+                player.shoot();
+            }
+        } else {
+            player.setIdle();
         }
     }
 
-    private void drawGame() {
+
+    private void logic() {
+        float delta = Gdx.graphics.getDeltaTime();
+        player.update(delta);
+
+        for (Enemy enemy : enemies) {
+            enemy.update(delta);
+        }
+
+        // Aquí podrías implementar colisiones con enemigos o proyectiles si es necesario
+    }
+
+    private void draw() {
         ScreenUtils.clear(Color.BLACK);
         viewport.apply();
-        batch.setProjectionMatrix(viewport.getCamera().combined);
-        batch.begin();
+        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
+        spriteBatch.begin();
 
-        float worldWidth = viewport.getWorldWidth();
-        float worldHeight = viewport.getWorldHeight();
+        spriteBatch.draw(backgroundTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
 
-        batch.draw(backgroundTexture, 0, 0, worldWidth, worldHeight);
-        playerSprite.draw(batch);
-        for (Sprite bullet : bullets) {
-            bullet.draw(batch);
+        for (Enemy enemy : enemies) {
+            enemy.draw(spriteBatch);
         }
 
-        batch.end();
-    }
+        player.draw(spriteBatch);
 
-    private void shootBullet() {
-        Sprite bullet = new Sprite(bulletTexture);
-        bullet.setSize(0.2f, 0.5f);
-        bullet.setPosition(playerSprite.getX() + playerSprite.getWidth() / 2 - 0.1f, playerSprite.getY() + playerSprite.getHeight());
-        bullets.add(bullet);
-        shootSound.play();
+        spriteBatch.end();
     }
 
     @Override
-    public void pause() {}
+    public void pause() {
+    }
 
     @Override
-    public void resume() {}
+    public void resume() {
+    }
 
     @Override
     public void dispose() {
-        batch.dispose();
-        backgroundTexture.dispose();
-        playerTexture.dispose();
-        bulletTexture.dispose();
-        shootSound.dispose();
-        backgroundMusic.dispose();
     }
 }
+
