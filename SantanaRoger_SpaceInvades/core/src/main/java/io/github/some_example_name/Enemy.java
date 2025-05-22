@@ -1,106 +1,72 @@
 package io.github.some_example_name;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 public class Enemy {
-    private Animation<TextureRegion> idleAnimation;
-    private Animation<TextureRegion> sideStartAnimation;
-    private Animation<TextureRegion> sideLoopAnimation;
-    private float stateTime;
-    private float x, y;
-    private float speedX = 1f;
-    private boolean movingRight = true;
-    private float worldWidth;
-    private float stepDown = 0.5f;
+    protected Animation<TextureRegion> idleAnimation;
+    protected float stateTime = 0f;
+    protected float x, y;
+    protected float worldWidth;
+    protected float speedX = 100f;       // Velocidad en unidades de mundo por segundo (pixeles lógicos)
+    protected boolean movingRight = true;
+    protected float stepDown = 30f;      // Bajar 30 unidades en Y cuando cambia de lado
 
-    private Texture bulletTexture;
-    private Array<Sprite> bullets;
-    private float shootCooldown = 2f;
-    private float shootTimer = 0f;
+    protected Texture bulletTexture;
+    protected Array<Sprite> bullets;
+    protected float shootCooldown = 2f;
+    protected float shootTimer = 0f;
 
-    private enum State { IDLE, SIDE_START, SIDE_LOOP }
-    private State currentState = State.IDLE;
+    protected static final float WIDTH = 50f;   // Tamaño ancho del enemigo en unidades de mundo (pixeles)
+    protected static final float HEIGHT = 50f;  // Tamaño alto
 
     public Enemy(float startX, float startY, float worldWidth) {
         this.x = startX;
         this.y = startY;
         this.worldWidth = worldWidth;
-        this.bullets = new Array<>();
-        this.bulletTexture = new Texture("bullet_1.png");
 
+        bullets = new Array<>();
+        bulletTexture = new Texture("bullet_1.png");
+
+        // Cargar animación idle
         TextureRegion[] idleFrames = new TextureRegion[5];
-        TextureRegion[] sideStartFrames = new TextureRegion[3];
-        TextureRegion[] sideLoopFrames = new TextureRegion[4];
-
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 5; i++) {
             idleFrames[i] = new TextureRegion(new Texture("idle_" + i + ".png"));
-
-        for (int i = 0; i < 3; i++)
-            sideStartFrames[i] = new TextureRegion(new Texture("side_" + i + ".png"));
-
-        for (int i = 0; i < 4; i++)
-            sideLoopFrames[i] = new TextureRegion(new Texture("trueside_" + i + ".png"));
+        }
 
         idleAnimation = new Animation<TextureRegion>(0.2f, idleFrames);
         idleAnimation.setPlayMode(Animation.PlayMode.LOOP);
-
-        sideStartAnimation = new Animation<TextureRegion>(0.15f, sideStartFrames);
-
-        sideLoopAnimation = new Animation<TextureRegion>(0.1f, sideLoopFrames);
-        sideLoopAnimation.setPlayMode(Animation.PlayMode.LOOP);
-
     }
 
     public void update(float delta) {
         stateTime += delta;
         shootTimer += delta;
 
+        // Movimiento lateral
         float move = speedX * delta * (movingRight ? 1 : -1);
         x += move;
 
-        if ((movingRight && x > worldWidth - 1) || (!movingRight && x < 0)) {
+        if ((movingRight && x > worldWidth - WIDTH) || (!movingRight && x < 0)) {
             movingRight = !movingRight;
             y -= stepDown;
-            stateTime = 0;
-            currentState = State.SIDE_START;
         }
 
-        if (currentState == State.SIDE_START && sideStartAnimation.isAnimationFinished(stateTime)) {
-            currentState = State.SIDE_LOOP;
-            stateTime = 0;
-        }
-
+        // Actualizar balas
         for (int i = bullets.size - 1; i >= 0; i--) {
             Sprite bullet = bullets.get(i);
-            bullet.translateY(-2f * delta);
+            bullet.translateY(-200f * delta);  // Velocidad bala ajustada a unidades mundo
             if (bullet.getY() < 0) bullets.removeIndex(i);
         }
     }
 
     public void draw(Batch batch) {
-
         TextureRegion currentFrame = idleAnimation.getKeyFrame(stateTime);
-            switch (currentState) {
-                case IDLE:
-                    currentFrame = idleAnimation.getKeyFrame(stateTime);
-                    break;
-                case SIDE_START:
-                    currentFrame = idleAnimation.getKeyFrame(stateTime);
-                    break;
-                case SIDE_LOOP:
-                    currentFrame = idleAnimation.getKeyFrame(stateTime);
-                    break;
-        };
-
-        batch.draw(currentFrame, x, y, 1f, 1f);
+        batch.draw(currentFrame, x, y, WIDTH, HEIGHT);  // Usar tamaño en unidades mundo
 
         for (Sprite bullet : bullets) {
             bullet.draw(batch);
@@ -110,23 +76,19 @@ public class Enemy {
     public void shoot() {
         if (shootTimer >= shootCooldown) {
             Sprite bullet = new Sprite(bulletTexture);
-            bullet.setSize(0.2f, 0.5f);
-            bullet.setPosition(x + 0.4f, y);
+            bullet.setSize(10f, 25f);   // Tamaño bala en unidades mundo
+            bullet.setPosition(x + WIDTH / 2 - 5f, y);  // Centrar bala en enemigo
             bullets.add(bullet);
             shootTimer = 0f;
-
-            System.out.println("Estoy Disparando");
-
         }
     }
 
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, WIDTH, HEIGHT);
+    }
 
     public Array<Sprite> getBullets() {
         return bullets;
-    }
-
-    public Rectangle getBounds() {
-        return new Rectangle(x, y, 1f, 1f);
     }
 
     public float getX() { return x; }
