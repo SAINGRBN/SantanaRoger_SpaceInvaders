@@ -96,7 +96,7 @@ public class StartScreen implements Screen {
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                clickSound.play();
+                clickSound.play(game.getSfxVolume());
                 game.setScreen(new GameScreen(game));
             }
         });

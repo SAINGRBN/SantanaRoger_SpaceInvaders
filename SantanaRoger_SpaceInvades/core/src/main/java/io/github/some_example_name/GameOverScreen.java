@@ -30,6 +30,8 @@ public class GameOverScreen implements Screen {
     private final Stage stage;
     private final Skin skin;
     private final TextButton retryButton, exitButton;
+    private final com.badlogic.gdx.audio.Sound clickSound;
+
 
     private int score;
 
@@ -81,6 +83,7 @@ public class GameOverScreen implements Screen {
         retryButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                clickSound.play(game.getSfxVolume());
                 game.setScreen(new GameScreen(game));
             }
         });
@@ -91,6 +94,7 @@ public class GameOverScreen implements Screen {
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                clickSound.play(game.getSfxVolume());
                 Gdx.app.exit();
             }
         });
@@ -99,6 +103,7 @@ public class GameOverScreen implements Screen {
         stage.addActor(exitButton);
 
         game.playMusic("gameover.mp3");
+        clickSound = Gdx.audio.newSound(Gdx.files.internal("ok.wav"));
     }
 
     @Override

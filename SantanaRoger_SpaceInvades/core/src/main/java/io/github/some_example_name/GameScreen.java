@@ -5,6 +5,11 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -27,15 +32,23 @@ public class GameScreen implements Screen {
     private int score = 0;
 
     private final com.badlogic.gdx.audio.Sound deathSound;
+    private final com.badlogic.gdx.audio.Sound clickSound;
 
     private float fastEnemySpawnTimer = 0f;
     private boolean fastEnemiesSpawned = false;
+
+    private Stage hudStage;        // Para botones táctiles como pausa
+    private Stage pauseStage;      // Para el menú de pausa
+    private Skin skin;
+    private boolean paused = false;
+
 
     public GameScreen(MainGame game) {
         this.game = game;
         this.spriteBatch = game.batch;
 
         deathSound = Gdx.audio.newSound(Gdx.files.internal("muerte.wav"));
+        clickSound = Gdx.audio.newSound(Gdx.files.internal("ok.wav"));
     }
 
     @Override
@@ -67,17 +80,92 @@ public class GameScreen implements Screen {
         font = generator.generateFont(param);
         generator.dispose();
 
+        // Cargar skin básica
+        skin = new Skin();
+        BitmapFont hudFont = new BitmapFont(); // Fuente simple para móviles
+        skin.add("default-font", hudFont);
+
+        TextButton.TextButtonStyle btnStyle = new TextButton.TextButtonStyle();
+        btnStyle.font = hudFont;
+        btnStyle.fontColor = Color.WHITE;
+        skin.add("default", btnStyle);
+
+// HUD Stage para botón de pausa
+        hudStage = new Stage(viewport, spriteBatch);
+        Gdx.input.setInputProcessor(hudStage);
+
+// Botón de pausa (puede ser texto o ícono si tienes uno)
+        TextButton pauseBtn = new TextButton("||", skin);
+        pauseBtn.setSize(60, 60);
+        pauseBtn.setPosition(viewport.getWorldWidth() - pauseBtn.getWidth() - 20, viewport.getWorldHeight() - pauseBtn.getHeight() - 20);
+
+        hudStage.addActor(pauseBtn);
+
+        pauseBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                clickSound.play(game.getSfxVolume());
+                paused = true;
+                Gdx.input.setInputProcessor(pauseStage);
+            }
+        });
+
+// Stage del menú de pausa
+        pauseStage = new Stage(viewport, spriteBatch);
+
+// Botón reanudar
+        TextButton resumeBtn = new TextButton("Reanudar", skin);
+        resumeBtn.setSize(300, 80);
+        resumeBtn.setPosition((viewport.getWorldWidth() - resumeBtn.getWidth()) / 2, 260);
+
+// Botón volver al menú
+        TextButton exitBtn = new TextButton("Volver al menú", skin);
+        exitBtn.setSize(300, 80);
+        exitBtn.setPosition((viewport.getWorldWidth() - exitBtn.getWidth()) / 2, 160);
+
+        pauseStage.addActor(resumeBtn);
+        pauseStage.addActor(exitBtn);
+
+// Listeners del menú
+        resumeBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                paused = false;
+                clickSound.play(game.getSfxVolume());
+                Gdx.input.setInputProcessor(hudStage);
+            }
+        });
+
+        exitBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                clickSound.play(game.getSfxVolume());
+                game.setScreen(new StartScreen(game));
+            }
+        });
 
 
-        Gdx.input.setInputProcessor(null);
+        //Gdx.input.setInputProcessor(null);
     }
 
     @Override
     public void render(float delta) {
-        input(delta);
-        logic(delta);
+        if (!paused) {
+            input(delta);
+            logic(delta);
+        }
+
         draw();
+
+        if (paused) {
+            pauseStage.act(delta);
+            pauseStage.draw();
+        } else {
+            hudStage.act(delta);
+            hudStage.draw();
+        }
     }
+
 
     private void input(float delta) {
         if (Gdx.input.isTouched()) {
@@ -187,5 +275,9 @@ public class GameScreen implements Screen {
         dropSound.dispose();
         music.dispose();
         font.dispose();
+        pauseStage.dispose();
+        hudStage.dispose();
+        skin.dispose();
+
     }
 }

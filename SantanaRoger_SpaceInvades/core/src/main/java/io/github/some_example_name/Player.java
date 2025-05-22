@@ -53,7 +53,7 @@ public class Player {
 
         currentAnimation = idleAnimation;
 
-        shootSound = Gdx.audio.newSound(Gdx.files.internal("ok.wav"));
+        shootSound = Gdx.audio.newSound(Gdx.files.internal("disparo.wav"));
     }
 
     private Animation<TextureRegion> loadAnimation(String prefix, int frameCount, float frameDuration, Animation.PlayMode playMode) {

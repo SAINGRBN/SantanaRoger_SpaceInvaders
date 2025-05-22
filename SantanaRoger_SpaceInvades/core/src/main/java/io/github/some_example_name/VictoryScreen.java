@@ -32,6 +32,7 @@ public class VictoryScreen implements Screen {
     private final TextButton retryButton, exitButton;
 
     private int score;
+    private final com.badlogic.gdx.audio.Sound clickSound;
 
     public VictoryScreen(MainGame game, int score) {
         this.game = game;
@@ -81,6 +82,7 @@ public class VictoryScreen implements Screen {
         retryButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                clickSound.play(game.getSfxVolume());
                 game.setScreen(new GameScreen(game));
             }
         });
@@ -91,6 +93,7 @@ public class VictoryScreen implements Screen {
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                clickSound.play(game.getSfxVolume());
                 Gdx.app.exit();
             }
         });
@@ -99,6 +102,7 @@ public class VictoryScreen implements Screen {
         stage.addActor(exitButton);
 
         game.playMusic("ending.mp3");
+        clickSound = Gdx.audio.newSound(Gdx.files.internal("ok.wav"));
     }
 
     @Override
